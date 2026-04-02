@@ -1,0 +1,45 @@
+{
+  "_comment": "Copy this file to digest-config.json and fill in your values. Never commit digest-config.json.",
+  "slack": {
+    "urgent_channels": [
+      "incidents",
+      "oncall-alerts",
+      "your-leadership-channel"
+    ],
+    "team_channels": [
+      "my-team",
+      "my-team-eng"
+    ],
+    "starred_channels": [
+      "company-announcements",
+      "all-hands"
+    ],
+    "digest_channel_id": "YOUR_SLACK_CHANNEL_ID",
+    "include_all_dms": true,
+    "lookback_hours": 1,
+    "morning_lookback_hours": 17,
+    "midday_lookback_hours": 4,
+    "scheduled_lookback_hours": 5
+  },
+  "gdrive": {
+    "scan_enabled": true,
+    "only_created_today": true,
+    "search_terms": ["meeting notes", "transcript", "1:1", "standup", "retro", "sync"],
+    "pinned_documents": [
+      {
+        "id": "YOUR_GOOGLE_DRIVE_DOC_ID",
+        "name": "Weekly status doc",
+        "note": "Always fetch — weekly status update"
+      }
+    ]
+  },
+  "schedule": {
+    "timezone": "CET",
+    "active_hours_start": "08:00",
+    "active_hours_end": "22:00"
+  },
+  "digest": {
+    "output_file": "~/.claude/digest-log.md",
+    "max_items_per_channel": 10
+  }
+}

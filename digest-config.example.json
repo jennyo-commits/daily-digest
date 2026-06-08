@@ -15,11 +15,24 @@
       "all-hands"
     ],
     "digest_channel_id": "YOUR_SLACK_CHANNEL_ID",
+    "exclude_user_id": "YOUR_SLACK_USER_ID",
     "include_all_dms": true,
     "lookback_hours": 1,
     "morning_lookback_hours": 17,
     "midday_lookback_hours": 4,
     "scheduled_lookback_hours": 5
+  },
+  "directs": {
+    "enabled": true,
+    "people": [
+      {
+        "name": "Report Name",
+        "slack_user_id": "SLACK_USER_ID",
+        "slack_username": "slackhandle",
+        "pinned_doc_id": "GOOGLE_DRIVE_DOC_ID",
+        "pinned_doc_name": "Weekly status doc"
+      }
+    ]
   },
   "gdrive": {
     "scan_enabled": true,

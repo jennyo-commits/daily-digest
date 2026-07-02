@@ -52,6 +52,9 @@
     "active_hours_start": "08:00",
     "active_hours_end": "22:00"
   },
+  "notes": {
+    "directory": "~/meeting-notes"
+  },
   "digest": {
     "output_file": "~/.claude/digest-log.md",
     "max_items_per_channel": 20

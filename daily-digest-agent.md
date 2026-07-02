@@ -57,6 +57,16 @@ For each person in `directs.people`, compile a **comprehensive per-person summar
 
 For each direct, produce a rich summary covering: current work, blockers/risks, key decisions, cross-team threads, asks for you, and wins.
 
+### Step 4c — Scan meeting notes
+
+Read `notes.directory` from config (default: `$HOME/meeting-notes`). List all `.md` files whose filename starts with today's date (`YYYY-MM-DD`). For each file, read the full content including frontmatter. Extract:
+- Meeting title, type, and participants
+- Key decisions made
+- Action items (especially any assigned to others or to you)
+- Open questions
+
+Include these in the digest output and merge any action items into the Action Items section.
+
 ### Step 5 — Generate digest
 Format:
 
@@ -88,6 +98,9 @@ Format:
 **Slack highlights:** {notable messages across channels, with channel name}
 
 {Repeat for each direct report}
+
+## 📝 Meeting Notes
+{today's meeting notes captured via /note — for each: title, type, participants, key decisions, action items, open questions}
 
 ## 📌 Doc Mentions
 {Google Doc comments where you were tagged — grouped by document}

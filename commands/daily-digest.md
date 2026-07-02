@@ -74,6 +74,16 @@ For each direct, produce a rich summary that covers:
 - **Asks or action items for you** — anything directed at you or needing your attention
 - **Wins & completions** — shipped work, merged PRs, resolved issues
 
+### Step 5c — Scan meeting notes
+
+Read `notes.directory` from config (default: `$HOME/meeting-notes`). List all `.md` files whose filename starts with today's date (`YYYY-MM-DD`). For each file, read the full content including frontmatter. Extract:
+- Meeting title, type, and participants
+- Key decisions made
+- Action items (especially any assigned to others or to you)
+- Open questions
+
+Include these in the digest output and merge any action items into the Action Items section.
+
 ### Step 6 — Generate digest
 
 Format the output as:
@@ -106,6 +116,9 @@ Format the output as:
 **Slack highlights:** {notable messages across channels, with channel name}
 
 {Repeat for each direct report}
+
+## 📝 Meeting Notes
+{today's meeting notes captured via /note — for each: title, type, participants, key decisions, action items, open questions}
 
 ## 📌 Doc Mentions
 {Google Doc comments where you were tagged — grouped by document}

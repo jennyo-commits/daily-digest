@@ -32,6 +32,21 @@ Also fetch any Drive docs linked from Slack messages in Step 3.
 Always fetch every document listed in `gdrive.pinned_documents`, regardless of modification date.
 Use `get_drive_file_content` (with offset pagination if needed) to read the full content of each pinned doc.
 
+### Step 4a — Scan Google Docs for mentions
+
+For every document encountered in this digest (pinned documents, Drive search results, and Slack-linked docs), use `list_document_comments` to fetch comments. Filter for comments that:
+- Were **created or updated** within the lookback window
+- **Mention the user** — check if the comment text or any reply contains the user's name or email from `gdrive.user_email`, or if the user is listed as a mentioned person in the comment
+
+For each matching comment, capture:
+- **Document title** and link
+- **Who commented** and when
+- **The quoted context** (the highlighted text the comment is attached to)
+- **The comment text** and any replies
+- **Whether it's resolved or open**
+
+Prioritize open/unresolved comments — these are likely still waiting for a response. Include resolved comments only if they were resolved today.
+
 ### Step 4b — Build detailed direct-reports view
 
 For each person in `directs.people`, compile a **comprehensive per-person summary** by combining:
@@ -73,6 +88,10 @@ Format:
 **Slack highlights:** {notable messages across channels, with channel name}
 
 {Repeat for each direct report}
+
+## 📌 Doc Mentions
+{Google Doc comments where you were tagged — grouped by document}
+{For each: who commented, quoted context, comment text, open/resolved}
 
 ## 📋 Meeting Notes & Transcripts
 {title, key decisions, action items}

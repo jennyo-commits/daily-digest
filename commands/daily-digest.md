@@ -43,6 +43,21 @@ Also fetch any Drive documents linked in Slack messages from Step 4.
 
 For **pinned documents** in `gdrive.pinned_documents`: always fetch these regardless of creation date, but **only include content that was written or updated during the current calendar week** (Monday–Sunday, CET). If the document's content is entirely from a previous week, skip it and note it had no updates this week.
 
+### Step 5a — Scan Google Docs for mentions
+
+For every document encountered in this digest (pinned documents, Drive search results, and Slack-linked docs), use `list_document_comments` to fetch comments. Filter for comments that:
+- Were **created or updated** within the lookback window
+- **Mention the user** — check if the comment text or any reply contains the user's name or email from `gdrive.user_email`, or if the user is listed as a mentioned person in the comment
+
+For each matching comment, capture:
+- **Document title** and link
+- **Who commented** and when
+- **The quoted context** (the highlighted text the comment is attached to)
+- **The comment text** and any replies
+- **Whether it's resolved or open**
+
+Prioritize open/unresolved comments — these are likely still waiting for a response. Include resolved comments only if they were resolved today (someone may have answered on your behalf).
+
 ### Step 5b — Build detailed direct-reports view
 
 For each person in `directs.people`, compile a **comprehensive per-person summary** by combining:
@@ -92,11 +107,15 @@ Format the output as:
 
 {Repeat for each direct report}
 
+## 📌 Doc Mentions
+{Google Doc comments where you were tagged — grouped by document}
+{For each: who commented, quoted context, comment text, open/resolved}
+
 ## 📋 Today's Meeting Notes & Transcripts
 {title, creator, key decisions and action items from each doc}
 
 ## ⚡ Action Items
-{all explicit tasks/action items surfaced from Slack or docs}
+{all explicit tasks/action items surfaced from Slack, docs, or doc mentions}
 ```
 
 **Directs section depth:** The Direct Reports section should be the most detailed part of the digest. Don't summarize — extract specifics: project names, ticket numbers, names of collaborators, concrete dates, exact blockers. If a direct's weekly doc has bullet points, preserve the substance. This section is for the user to get a thorough understanding of each report's week without reading the source docs.

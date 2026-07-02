@@ -38,6 +38,7 @@
     "scan_enabled": true,
     "only_created_today": true,
     "search_terms": ["meeting notes", "transcript", "1:1", "standup", "retro", "sync"],
+    "user_email": "your-email@spotify.com",
     "pinned_documents": [
       {
         "id": "YOUR_GOOGLE_DRIVE_DOC_ID",

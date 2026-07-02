@@ -14,9 +14,11 @@ Compute `oldest` as: current Unix timestamp minus `scheduled_lookback_hours × 3
 
 ### Step 3 — Scan Slack
 For each channel across all categories (urgent, team, starred), use `slack_search_channels`
-to resolve the channel ID, then `slack_read_channel` with `limit: 10` and the computed `oldest`.
+to resolve the channel ID, then `slack_read_channel` with `limit: 20` and the computed `oldest`.
 Also fetch DMs if `include_all_dms` is true.
 Note any Google Drive document URLs linked in messages.
+
+**Follow threads:** For any message that has replies (indicated by `reply_count > 0` or a thread timestamp), use `slack_read_thread` to fetch the full thread. Threads are where most substantive discussion happens — decisions, blockers, and context live in replies, not top-level messages. Prioritize threads with 3+ replies or threads started by direct reports.
 
 **Exclude own messages:** Skip all messages authored by the user configured in `slack.exclude_user_id`. The user already knows what they posted — the digest should only surface what *others* said.
 
@@ -35,8 +37,8 @@ Use `get_drive_file_content` (with offset pagination if needed) to read the full
 For each person in `directs.people`, compile a **comprehensive per-person summary** by combining:
 
 1. **Weekly doc** — Use `get_drive_file_content` (NOT `get_document_preview`) to read the **full content** of each direct's pinned document. Paginate with offsets if needed to capture the entire document. Extract everything: status updates, blockers, wins, risks, plans, open questions, and action items.
-2. **Slack activity** — Gather all messages from this person collected in Step 3 across every channel. Also run `slack_search_public` with `from:<slack_username>` for the time window to catch messages in channels not in the scan list.
-3. **DMs to you** — Pull any DMs from this person (already captured if `include_all_dms` is true).
+2. **Slack activity** — Gather all messages from this person collected in Step 3 across every channel. Also run `slack_search_public_and_private` with `from:<slack_username>` for the time window to catch messages in channels not in the scan list (this includes private channels the user is a member of). For any threads they participated in, use `slack_read_thread` to capture the full conversation context.
+3. **DMs to you** — Pull any DMs from this person (already captured if `include_all_dms` is true). Read any threads in the DM conversation.
 
 For each direct, produce a rich summary covering: current work, blockers/risks, key decisions, cross-team threads, asks for you, and wins.
 
@@ -81,8 +83,16 @@ Format:
 
 **Directs section depth:** The Direct Reports section should be the most detailed part of the digest. Don't summarize — extract specifics: project names, ticket numbers, collaborator names, concrete dates, exact blockers. If a direct's weekly doc has bullet points, preserve the substance.
 
-For the rest: be concise. Summarise, don't transcribe. Skip channels with no activity.
-Channels with zero messages in the window: list them in a single "No activity" line at the end of each section.
+For the rest of the digest: include enough context that the user can understand what happened without going to the source. For each channel, capture:
+- **Decisions made** — what was decided and by whom
+- **Blockers raised** — what's stuck and who's affected
+- **Asks and action items** — requests for input, reviews, approvals
+- **Key discussions** — summarize the substance of active threads (who said what, not just "there was a discussion about X")
+- **Links shared** — notable documents, PRs, or dashboards linked
+
+Don't transcribe every message, but don't reduce threads to one-liners either. Preserve enough detail that the user knows whether they need to follow up.
+
+Skip channels with no activity. Channels with zero messages in the window: list them in a single "No activity" line at the end of each section.
 
 ### Step 6 — Save
 Append the digest to `$HOME/.claude/digest-log.md` with a `---` separator before each entry.

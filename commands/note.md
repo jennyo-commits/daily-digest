@@ -75,6 +75,23 @@ topics:
 {questions or TBDs extracted from the notes, or "None noted" if none}
 ```
 
+### Step 4b — Save copy to Google Drive
+
+After saving the local file, also create a Google Doc copy using `create_google_doc` from the Enterprise Context Agent:
+
+- **Title:** `{Meeting Title} — {YYYY-MM-DD}` (e.g., "1:1 with Mahita — 2026-07-02")
+- **Content:** structured with headings and bullet lists matching the local file:
+  - Heading 1: meeting title and date
+  - Paragraph: metadata (date, type, participants, topics)
+  - Heading 2: "Notes" → bullet list of the user's notes
+  - Heading 2: "Decisions" → bullet list or paragraph
+  - Heading 2: "Action Items" → bullet list or paragraph
+  - Heading 2: "Open Questions" → bullet list or paragraph
+
+Add the Google Doc URL to the local file's frontmatter as `gdrive_url`.
+
+This ensures the scheduled digest agent can find meeting notes when preparing for upcoming meetings.
+
 ### Step 5 — Confirm
 
 Display a brief confirmation:

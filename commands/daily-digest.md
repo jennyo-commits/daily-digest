@@ -27,7 +27,9 @@ Read recent messages for each configured category:
 - **Starred channels** — each channel in `slack.starred_channels`
 - **Direct messages** — recent DMs received (if `include_all_dms` is true)
 
-Use `slack_read_channel` for each. Limit to `max_items_per_channel` messages per channel. Note any Google Drive document URLs linked in messages — fetch those in Step 5.
+Use `slack_read_channel` for each. Limit to `max_items_per_channel` messages per channel (default: 20). Note any Google Drive document URLs linked in messages — fetch those in Step 5.
+
+**Follow threads:** For any message that has replies (indicated by `reply_count > 0` or a thread timestamp), use `slack_read_thread` to fetch the full thread. Threads are where most substantive discussion happens — decisions, blockers, and context live in replies, not top-level messages. Prioritize threads with 3+ replies or threads started by direct reports.
 
 **Exclude own messages:** Skip all messages authored by the user configured in `slack.exclude_user_id`. The user already knows what they posted — the digest should only surface what *others* said. When summarising channel activity, do not mention or count the excluded user's messages at all.
 
@@ -41,13 +43,28 @@ Also fetch any Drive documents linked in Slack messages from Step 4.
 
 For **pinned documents** in `gdrive.pinned_documents`: always fetch these regardless of creation date, but **only include content that was written or updated during the current calendar week** (Monday–Sunday, CET). If the document's content is entirely from a previous week, skip it and note it had no updates this week.
 
+### Step 5a — Scan Google Docs for mentions
+
+For every document encountered in this digest (pinned documents, Drive search results, and Slack-linked docs), use `list_document_comments` to fetch comments. Filter for comments that:
+- Were **created or updated** within the lookback window
+- **Mention the user** — check if the comment text or any reply contains the user's name or email from `gdrive.user_email`, or if the user is listed as a mentioned person in the comment
+
+For each matching comment, capture:
+- **Document title** and link
+- **Who commented** and when
+- **The quoted context** (the highlighted text the comment is attached to)
+- **The comment text** and any replies
+- **Whether it's resolved or open**
+
+Prioritize open/unresolved comments — these are likely still waiting for a response. Include resolved comments only if they were resolved today (someone may have answered on your behalf).
+
 ### Step 5b — Build detailed direct-reports view
 
 For each person in `directs.people`, compile a **comprehensive per-person summary** by combining:
 
 1. **Weekly doc** — Use `get_drive_file_content` (NOT `get_document_preview`) to read the **full content** of each direct's pinned document. Paginate with offsets if needed to capture the entire document. Extract everything: status updates, blockers, wins, risks, plans, open questions, and action items.
-2. **Slack activity** — Gather all messages from this person collected in Step 4 across every channel. Also run `slack_search_public` with `from:<slack_username>` for the time window to catch messages in channels not in the scan list.
-3. **DMs to you** — Pull any DMs from this person (already captured if `include_all_dms` is true).
+2. **Slack activity** — Gather all messages from this person collected in Step 4 across every channel. Also run `slack_search_public_and_private` with `from:<slack_username>` for the time window to catch messages in channels not in the scan list (this includes private channels the user is a member of). For any threads they participated in, use `slack_read_thread` to capture the full conversation context.
+3. **DMs to you** — Pull any DMs from this person (already captured if `include_all_dms` is true). Read any threads in the DM conversation.
 
 For each direct, produce a rich summary that covers:
 - **What they're working on** — current projects, tasks, progress
@@ -56,6 +73,16 @@ For each direct, produce a rich summary that covers:
 - **Collaborations & cross-team threads** — conversations with other teams, reviews, dependencies
 - **Asks or action items for you** — anything directed at you or needing your attention
 - **Wins & completions** — shipped work, merged PRs, resolved issues
+
+### Step 5c — Scan meeting notes
+
+Read `notes.directory` from config (default: `$HOME/meeting-notes`). List all `.md` files whose filename starts with today's date (`YYYY-MM-DD`). For each file, read the full content including frontmatter. Extract:
+- Meeting title, type, and participants
+- Key decisions made
+- Action items (especially any assigned to others or to you)
+- Open questions
+
+Include these in the digest output and merge any action items into the Action Items section.
 
 ### Step 6 — Generate digest
 
@@ -90,16 +117,30 @@ Format the output as:
 
 {Repeat for each direct report}
 
+## 📝 Meeting Notes
+{today's meeting notes captured via /note — for each: title, type, participants, key decisions, action items, open questions}
+
+## 📌 Doc Mentions
+{Google Doc comments where you were tagged — grouped by document}
+{For each: who commented, quoted context, comment text, open/resolved}
+
 ## 📋 Today's Meeting Notes & Transcripts
 {title, creator, key decisions and action items from each doc}
 
 ## ⚡ Action Items
-{all explicit tasks/action items surfaced from Slack or docs}
+{all explicit tasks/action items surfaced from Slack, docs, or doc mentions}
 ```
 
 **Directs section depth:** The Direct Reports section should be the most detailed part of the digest. Don't summarize — extract specifics: project names, ticket numbers, names of collaborators, concrete dates, exact blockers. If a direct's weekly doc has bullet points, preserve the substance. This section is for the user to get a thorough understanding of each report's week without reading the source docs.
 
-For the rest of the digest: be concise. Summarize, don't transcribe. Highlight decisions, blockers, and asks.
+For the rest of the digest: include enough context that the user can understand what happened without going to the source. For each channel, capture:
+- **Decisions made** — what was decided and by whom
+- **Blockers raised** — what's stuck and who's affected
+- **Asks and action items** — requests for input, reviews, approvals
+- **Key discussions** — summarize the substance of active threads (who said what, not just "there was a discussion about X")
+- **Links shared** — notable documents, PRs, or dashboards linked
+
+Don't transcribe every message, but don't reduce threads to one-liners either. Preserve enough detail that the user knows whether they need to follow up.
 
 ### Step 7 — Save and display
 

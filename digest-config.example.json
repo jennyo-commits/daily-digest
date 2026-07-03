@@ -38,6 +38,7 @@
     "scan_enabled": true,
     "only_created_today": true,
     "search_terms": ["meeting notes", "transcript", "1:1", "standup", "retro", "sync"],
+    "user_email": "your-email@spotify.com",
     "pinned_documents": [
       {
         "id": "YOUR_GOOGLE_DRIVE_DOC_ID",
@@ -51,8 +52,11 @@
     "active_hours_start": "08:00",
     "active_hours_end": "22:00"
   },
+  "notes": {
+    "directory": "~/meeting-notes"
+  },
   "digest": {
     "output_file": "~/.claude/digest-log.md",
-    "max_items_per_channel": 10
+    "max_items_per_channel": 20
   }
 }
